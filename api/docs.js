@@ -2,6 +2,10 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -39,10 +43,10 @@ const customCss = `
 `;
 
 app.get('/api.ico', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'api.ico'));
+  res.sendFile(path.join(__dirname, '../public', 'api.ico'));
 });
 
-app.use('/', express.static(path.join(process.cwd(), 'public')));
+app.use('/', express.static(path.join(__dirname, '../public')));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
   customCss,
