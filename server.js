@@ -1,21 +1,23 @@
-import { json } from 'micro';
-import Cors from 'micro-cors';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
-import { router, get } from 'microrouter';
-import serveStatic from 'serve-static';
-import path from 'path';
+const express = require('express');
+const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 
-const cors = Cors();
+const app = express();
+const PORT = 3000;
+
+// Middleware untuk parsing JSON
+app.use(bodyParser.json());
 
 // Simpan API keys di sini (untuk demo saja, sebaiknya simpan di tempat yang lebih aman)
 const API_KEYS = ['123456', 'abcdef'];
 
 // Middleware untuk memeriksa API key
-const checkApiKey = (handler) => (req, res) => {
+const checkApiKey = (req, res, next) => {
   const apiKey = req.headers['x-api-key'];
   if (API_KEYS.includes(apiKey)) {
-    return handler(req, res);
+    next();
   } else {
     res.status(403).json({ error: 'Forbidden - Invalid API Key' });
   }
@@ -27,10 +29,11 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'HardiDev-APIs',
-      version: '1.0.0 BETA',
+      version: '1.0.11',
       description: 'Free API for everyone.',
       contact: {
         name: 'Developer',
+        url: 'https://example.com',
         email: 'developer@example.com',
       },
       license: {
@@ -44,29 +47,67 @@ const options = {
       },
     ],
   },
-  apis: ['./api/index.js'], // File dengan anotasi Swagger
+  apis: ['./server.js'], // File dengan anotasi Swagger
 };
 
 const specs = swaggerJsdoc(options);
 
+// Custom CSS untuk menyembunyikan elemen-elemen Swagger
+const customCss = `
+  .swagger-ui .topbar { 
+    display: none !important; 
+  }
+`;
+
 // Serve favicon
-const serveFavicon = serveStatic(path.join(__dirname, 'api.ico'));
+app.get('/api.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'favicon.ico'));
+});
 
-// Handler untuk protected data
-const getProtectedData = (req, res) => {
+// Menggunakan Swagger UI dengan custom shortcut icon
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss,
+  customSiteTitle: 'HardiDev-APIs',
+  customfavIcon: '/api.ico'
+}));
+
+// Sajikan file statis dari folder 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+/**
+ * @swagger
+ * /protected:
+ *   get:
+ *     summary: Get protected data
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: This is protected data
+ *       403:
+ *         description: Forbidden - Invalid API Key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Forbidden - Invalid API Key
+ */
+app.get('/protected', checkApiKey, (req, res) => {
   res.json({ message: 'This is protected data' });
-};
+});
 
-// Handler untuk Swagger UI
-const swaggerHandler = (req, res) => {
-  swaggerUi.setup(specs)(req, res);
-};
-
-// API routes
-export default cors(
-  router(
-    get('/api/protected', checkApiKey(getProtectedData)),
-    get('/api-docs', swaggerHandler),
-    get('/api.ico', serveFavicon)
-  )
-);
+// Menjalankan server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
