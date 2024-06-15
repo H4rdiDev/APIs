@@ -29,7 +29,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'HardiDev-APIs',
-      version: '1.0.0. BETA',
+      version: '1.0.0 BETA',
       description: 'Free API for everyone.',
       contact: {
         name: 'Developer',
