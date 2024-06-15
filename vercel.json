@@ -1,8 +1,0 @@
-{
-  ],
-  "routes": [
-    { "src": "/api/protected", "dest": "/api/protected.js" },
-    { "src": "/api-docs", "dest": "/api/docs.js" },
-    { "src": "/", "dest": "/public/index.html" }
-  ]
-}
