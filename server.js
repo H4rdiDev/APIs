@@ -29,11 +29,10 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'HardiDev-APIs',
-      version: '1.0.11',
+      version: '1.0.0. BETA',
       description: 'Free API for everyone.',
       contact: {
         name: 'Developer',
-        url: 'https://example.com',
         email: 'developer@example.com',
       },
       license: {
@@ -61,7 +60,7 @@ const customCss = `
 
 // Serve favicon
 app.get('/api.ico', (req, res) => {
-  res.sendFile(path.join(__dirname, 'favicon.ico'));
+  res.sendFile(path.join(__dirname, 'api.ico'));
 });
 
 // Menggunakan Swagger UI dengan custom shortcut icon
